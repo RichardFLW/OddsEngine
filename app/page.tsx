@@ -14,13 +14,12 @@ export default async function Home() {
             Tableau officiel
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-            Classement Ligue 1 Uber Eats
+            Classement Ligue 1
           </h1>
           <p className="max-w-2xl text-base text-zinc-400">
-            Les donnees sont chargees depuis les fichiers JSON locaux afin de
-            reconstituer le classement. Choisissez la saison a visualiser pour
-            consulter le tableau correspondant (tri sur points, difference de
-            buts puis buts marques).
+            Choisissez la saison a visualiser pour consulter le tableau
+            correspondant. Le classement de la saison en cours sera mis à jour
+            avec un peu de retard, veuillez m&apos;en excusez.
           </p>
         </header>
 
