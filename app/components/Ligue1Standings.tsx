@@ -37,6 +37,8 @@ const MATCHDAY_DATE_FORMATTER = new Intl.DateTimeFormat("fr-FR", {
   month: "short",
   hour: "2-digit",
   minute: "2-digit",
+  hour12: false,
+  timeZone: "UTC",
 });
 
 type Props = {
@@ -79,8 +81,19 @@ export function Ligue1Standings({ seasons }: Props) {
     );
   }, [activeSeason, selectedMatchday]);
 
-  const formatMatchDate = (isoDate: string) =>
-    MATCHDAY_DATE_FORMATTER.format(new Date(isoDate));
+  const formatMatchDate = (isoDate: string) => {
+    const parts = MATCHDAY_DATE_FORMATTER.formatToParts(new Date(isoDate));
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((part) => part.type === type)?.value ?? "";
+
+    const weekday = get("weekday");
+    const day = get("day");
+    const month = get("month");
+    const hour = get("hour");
+    const minute = get("minute");
+
+    return `${weekday} ${day} ${month} · ${hour}:${minute}`;
+  };
 
   const handleJumpToMatchdays = () => {
     matchdaysRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -262,11 +275,46 @@ export function Ligue1Standings({ seasons }: Props) {
                 key={match.id}
                 className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3 shadow-sm shadow-black/20"
               >
-                <div>
-                  <p className="text-sm font-semibold text-white">
-                    {match.homeTeamName} <span className="text-zinc-400">vs</span>{" "}
-                    {match.awayTeamName}
-                  </p>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-3 text-sm font-semibold text-white">
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const icon = getTeamIcon(match.homeTeamName);
+                        return icon ? (
+                          <Image
+                            src={icon}
+                            alt={`Logo ${match.homeTeamName}`}
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0 object-contain"
+                          />
+                        ) : (
+                          <div className="h-5 w-5 shrink-0 rounded-full border border-white/10" />
+                        );
+                      })()}
+                      <span>{match.homeTeamName}</span>
+                    </div>
+                    <span className="text-xs font-normal uppercase tracking-wide text-zinc-400">
+                      vs
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const icon = getTeamIcon(match.awayTeamName);
+                        return icon ? (
+                          <Image
+                            src={icon}
+                            alt={`Logo ${match.awayTeamName}`}
+                            width={20}
+                            height={20}
+                            className="h-5 w-5 shrink-0 object-contain"
+                          />
+                        ) : (
+                          <div className="h-5 w-5 shrink-0 rounded-full border border-white/10" />
+                        );
+                      })()}
+                      <span>{match.awayTeamName}</span>
+                    </div>
+                  </div>
                   <p className="text-xs text-zinc-400">
                     {formatMatchDate(match.playedAt)}
                   </p>
