@@ -25,6 +25,7 @@ type SeasonFile = {
   name: string;
   teams: Team[];
   matches: Match[];
+  matchdays?: { number: number; matchIds: string[] }[];
 };
 
 export type TeamStanding = {
@@ -44,6 +45,23 @@ export type SeasonStandings = {
   id: string;
   name: string;
   standings: TeamStanding[];
+  matchdays: Matchday[];
+};
+
+export type MatchdayMatch = {
+  id: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  playedAt: string;
+  homeScore: number;
+  awayScore: number;
+};
+
+export type Matchday = {
+  number: number;
+  matches: MatchdayMatch[];
 };
 
 const DATA_ROOT = path.join(process.cwd(), "data");
@@ -142,6 +160,59 @@ function calculateStandings(season: SeasonFile): TeamStanding[] {
   return standings;
 }
 
+function buildMatchdays(season: SeasonFile): Matchday[] {
+  const teamNameById = new Map(season.teams.map((team) => [team.id, team.name]));
+  const matchById = new Map(season.matches.map((match) => [match.id, match]));
+
+  const providedMatchdays =
+    season.matchdays?.map((day) => ({
+      number: day.number,
+      matchIds: day.matchIds.filter((id) => matchById.has(id)),
+    })) ?? [];
+
+  const isCompleteProvided =
+    providedMatchdays.length > 0 &&
+    providedMatchdays.reduce((total, day) => total + day.matchIds.length, 0) ===
+      season.matches.length;
+
+  const matchdayIdSets =
+    isCompleteProvided && providedMatchdays.every((day) => day.matchIds.length)
+      ? providedMatchdays
+      : (() => {
+          const sorted = [...season.matches].sort(
+            (a, b) =>
+              new Date(a.playedAt).getTime() - new Date(b.playedAt).getTime(),
+          );
+
+          const computed: { number: number; matchIds: string[] }[] = [];
+          for (let i = 0; i < sorted.length; i += 9) {
+            computed.push({
+              number: computed.length + 1,
+              matchIds: sorted.slice(i, i + 9).map((match) => match.id),
+            });
+          }
+
+          return computed;
+        })();
+
+  return matchdayIdSets.map((day, index) => ({
+    number: day.number ?? index + 1,
+    matches: day.matchIds
+      .map((matchId) => matchById.get(matchId))
+      .filter((match): match is Match => Boolean(match))
+      .map((match) => ({
+        id: match.id,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
+        homeTeamName: teamNameById.get(match.homeTeamId) ?? "Equipe inconnue",
+        awayTeamName: teamNameById.get(match.awayTeamId) ?? "Equipe inconnue",
+        playedAt: match.playedAt,
+        homeScore: match.homeScore,
+        awayScore: match.awayScore,
+      })),
+  }));
+}
+
 const loadLigue1Standings = cache(async () => {
   const db = await readJsonFile<DbFile>(path.join(DATA_ROOT, "db.json"));
   const seasons = await Promise.all(
@@ -152,6 +223,7 @@ const loadLigue1Standings = cache(async () => {
         id: season.id,
         name: season.name,
         standings: calculateStandings(season),
+        matchdays: buildMatchdays(season),
       };
     }),
   );
