@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
 import type { SeasonStandings } from "@/lib/ligue1";
@@ -53,6 +53,7 @@ export function Ligue1Standings({ seasons }: Props) {
       1
     );
   });
+  const matchdaysRef = useRef<HTMLElement | null>(null);
 
   const activeSeason = useMemo(
     () => seasons.find((season) => season.id === selectedId) ?? seasons[0],
@@ -80,6 +81,10 @@ export function Ligue1Standings({ seasons }: Props) {
 
   const formatMatchDate = (isoDate: string) =>
     MATCHDAY_DATE_FORMATTER.format(new Date(isoDate));
+
+  const handleJumpToMatchdays = () => {
+    matchdaysRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   if (!activeSeason) {
     return (
@@ -120,6 +125,14 @@ export function Ligue1Standings({ seasons }: Props) {
             ))}
           </select>
         </label>
+
+        <button
+          type="button"
+          onClick={handleJumpToMatchdays}
+          className="w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
+        >
+          Voir les matchdays
+        </button>
       </div>
 
       {activeSeason.standings.length > 0 ? (
@@ -207,7 +220,11 @@ export function Ligue1Standings({ seasons }: Props) {
       )}
 
       {activeSeason.matchdays.length > 0 ? (
-        <section className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-900/20 via-zinc-900/40 to-black/60 p-6 shadow-inner shadow-black/30">
+        <section
+          ref={matchdaysRef}
+          id="matchdays"
+          className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-900/20 via-zinc-900/40 to-black/60 p-6 shadow-inner shadow-black/30"
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">
