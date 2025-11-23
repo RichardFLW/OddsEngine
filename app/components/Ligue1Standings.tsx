@@ -1,35 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
 import type { SeasonStandings } from "@/lib/ligue1";
+import { getTeamIcon } from "@/lib/teamIcons";
 
-const TEAM_ICON_MAP: Record<string, string> = {
-  "Paris-SG": "/icons/teams/psg.png",
-  Marseille: "/icons/teams/marseille.png",
-  Monaco: "/icons/teams/monaco.png",
-  Nice: "/icons/teams/nice.png",
-  Lille: "/icons/teams/lille.png",
-  Lyon: "/icons/teams/lyon.png",
-  Strasbourg: "/icons/teams/strasbourg.png",
-  Lens: "/icons/teams/lens.png",
-  Brest: "/icons/teams/brest.png",
-  Toulouse: "/icons/teams/toulouse.png",
-  Auxerre: "/icons/teams/auxerre.png",
-  Rennes: "/icons/teams/rennes.png",
-  Nantes: "/icons/teams/nantes.png",
-  Angers: "/icons/teams/angers.png",
-  "Le Havre": "/icons/teams/lehavre.png",
-  Reims: "/icons/teams/reims.png",
-  "Saint-Etienne": "/icons/teams/stetienne.png",
-  Montpellier: "/icons/teams/montpellier.png",
-  Lorient: "/icons/teams/lorient.png",
-  Metz: "/icons/teams/metz.png",
-  "Paris FC": "/icons/teams/parisfc.png",
-};
-
-const getTeamIcon = (teamName: string) => TEAM_ICON_MAP[teamName] ?? null;
+const getTeamHref = (teamId: string) => `/teams/${teamId}`;
 
 const MATCHDAY_DATE_FORMATTER = new Intl.DateTimeFormat("fr-FR", {
   weekday: "short",
@@ -177,7 +155,10 @@ export function Ligue1Standings({ seasons }: Props) {
                       {index + 1}
                     </td>
                     <td className="px-3 py-2 text-sm font-medium">
-                      <div className="flex items-center gap-4 lg:gap-6">
+                      <Link
+                        href={getTeamHref(team.teamId)}
+                        className="group flex items-center gap-4 lg:gap-6"
+                      >
                         {icon ? (
                           <Image
                             src={icon}
@@ -190,10 +171,10 @@ export function Ligue1Standings({ seasons }: Props) {
                         ) : (
                           <div className="h-7 w-7 shrink-0 border border-dashed border-white/10 sm:h-8 sm:w-8" />
                         )}
-                        <span className="text-sm sm:text-base lg:text-lg">
+                        <span className="text-sm transition group-hover:text-indigo-200 sm:text-base lg:text-lg">
                           {team.teamName}
                         </span>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-3 py-2 text-right text-xs text-zinc-200 sm:text-sm lg:text-base">
                       {team.played}
@@ -277,7 +258,10 @@ export function Ligue1Standings({ seasons }: Props) {
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-3 text-sm font-semibold text-white">
-                    <div className="flex items-center gap-2">
+                    <Link
+                      href={getTeamHref(match.homeTeamId)}
+                      className="flex items-center gap-2 transition hover:text-indigo-200"
+                    >
                       {(() => {
                         const icon = getTeamIcon(match.homeTeamName);
                         return icon ? (
@@ -293,11 +277,14 @@ export function Ligue1Standings({ seasons }: Props) {
                         );
                       })()}
                       <span>{match.homeTeamName}</span>
-                    </div>
+                    </Link>
                     <span className="text-xs font-normal uppercase tracking-wide text-zinc-400">
                       vs
                     </span>
-                    <div className="flex items-center gap-2">
+                    <Link
+                      href={getTeamHref(match.awayTeamId)}
+                      className="flex items-center gap-2 transition hover:text-indigo-200"
+                    >
                       {(() => {
                         const icon = getTeamIcon(match.awayTeamName);
                         return icon ? (
@@ -313,7 +300,7 @@ export function Ligue1Standings({ seasons }: Props) {
                         );
                       })()}
                       <span>{match.awayTeamName}</span>
-                    </div>
+                    </Link>
                   </div>
                   <p className="text-xs text-zinc-400">
                     {formatMatchDate(match.playedAt)}

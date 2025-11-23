@@ -1,0 +1,25 @@
+export const TEAM_ICON_MAP: Record<string, string> = {
+  "Paris-SG": "/icons/teams/psg.png",
+  Marseille: "/icons/teams/marseille.png",
+  Monaco: "/icons/teams/monaco.png",
+  Nice: "/icons/teams/nice.png",
+  Lille: "/icons/teams/lille.png",
+  Lyon: "/icons/teams/lyon.png",
+  Strasbourg: "/icons/teams/strasbourg.png",
+  Lens: "/icons/teams/lens.png",
+  Brest: "/icons/teams/brest.png",
+  Toulouse: "/icons/teams/toulouse.png",
+  Auxerre: "/icons/teams/auxerre.png",
+  Rennes: "/icons/teams/rennes.png",
+  Nantes: "/icons/teams/nantes.png",
+  Angers: "/icons/teams/angers.png",
+  "Le Havre": "/icons/teams/lehavre.png",
+  Reims: "/icons/teams/reims.png",
+  "Saint-Etienne": "/icons/teams/stetienne.png",
+  Montpellier: "/icons/teams/montpellier.png",
+  Lorient: "/icons/teams/lorient.png",
+  Metz: "/icons/teams/metz.png",
+  "Paris FC": "/icons/teams/parisfc.png",
+};
+
+export const getTeamIcon = (teamName: string) => TEAM_ICON_MAP[teamName] ?? null;

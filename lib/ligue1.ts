@@ -64,6 +64,38 @@ export type Matchday = {
   matches: MatchdayMatch[];
 };
 
+export type TeamProfile = {
+  teamId: string;
+  teamName: string;
+  seasons: { id: string; name: string }[];
+  latestSeasonId: string;
+};
+
+export type TeamSeasonMatch = {
+  id: string;
+  seasonId: string;
+  seasonName: string;
+  playedAt: string;
+  isHome: boolean;
+  opponentId: string;
+  opponentName: string;
+  goalsFor: number;
+  goalsAgainst: number;
+  result: "V" | "N" | "D";
+};
+
+export type TeamSeasonData = {
+  seasonId: string;
+  seasonName: string;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  points: number;
+  matches: TeamSeasonMatch[];
+};
+
 const DATA_ROOT = path.join(process.cwd(), "data");
 const LIGUE1_SEASONS_DIR = path.join(DATA_ROOT, "france", "ligue1", "seasons");
 
@@ -233,4 +265,95 @@ const loadLigue1Standings = cache(async () => {
 
 export async function getLigue1Standings(): Promise<SeasonStandings[]> {
   return loadLigue1Standings();
+}
+
+export async function getLigue1TeamProfile(
+  teamId: string,
+): Promise<TeamProfile | null> {
+  const db = await readJsonFile<DbFile>(path.join(DATA_ROOT, "db.json"));
+
+  const seasonsForTeam: { id: string; name: string; teamName: string }[] = [];
+  for (const seasonId of db.seasonOrder) {
+    const filePath = path.join(LIGUE1_SEASONS_DIR, `${seasonId}.json`);
+    const season = await readJsonFile<SeasonFile>(filePath);
+    const team = season.teams.find((t) => t.id === teamId);
+    if (team) {
+      seasonsForTeam.push({ id: season.id, name: season.name, teamName: team.name });
+    }
+  }
+
+  if (seasonsForTeam.length === 0) {
+    return null;
+  }
+
+  const latest = seasonsForTeam[0];
+  return {
+    teamId,
+    teamName: latest.teamName,
+    seasons: seasonsForTeam.map((s) => ({ id: s.id, name: s.name })),
+    latestSeasonId: latest.id,
+  };
+}
+
+export async function getLigue1TeamSeasonData(
+  teamId: string,
+  seasonId: string,
+): Promise<TeamSeasonData | null> {
+  const seasonPath = path.join(LIGUE1_SEASONS_DIR, `${seasonId}.json`);
+  const season = await readJsonFile<SeasonFile>(seasonPath);
+
+  const team = season.teams.find((t) => t.id === teamId);
+  if (!team) return null;
+
+  const teamNameById = new Map(season.teams.map((t) => [t.id, t.name]));
+
+  const matches = season.matches
+    .filter(
+      (match) => match.homeTeamId === teamId || match.awayTeamId === teamId,
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.playedAt).getTime() - new Date(b.playedAt).getTime(),
+    )
+    .map((match) => {
+      const isHome = match.homeTeamId === teamId;
+      const opponentId = isHome ? match.awayTeamId : match.homeTeamId;
+      const goalsFor = isHome ? match.homeScore : match.awayScore;
+      const goalsAgainst = isHome ? match.awayScore : match.homeScore;
+      let result: "V" | "N" | "D" = "N";
+      if (goalsFor > goalsAgainst) result = "V";
+      else if (goalsFor < goalsAgainst) result = "D";
+
+      return {
+        id: match.id,
+        seasonId: season.id,
+        seasonName: season.name,
+        playedAt: match.playedAt,
+        isHome,
+        opponentId,
+        opponentName: teamNameById.get(opponentId) ?? "Equipe inconnue",
+        goalsFor,
+        goalsAgainst,
+        result,
+      } satisfies TeamSeasonMatch;
+    });
+
+  const wins = matches.filter((m) => m.result === "V").length;
+  const draws = matches.filter((m) => m.result === "N").length;
+  const losses = matches.filter((m) => m.result === "D").length;
+  const goalsFor = matches.reduce((acc, m) => acc + m.goalsFor, 0);
+  const goalsAgainst = matches.reduce((acc, m) => acc + m.goalsAgainst, 0);
+  const points = wins * 3 + draws;
+
+  return {
+    seasonId: season.id,
+    seasonName: season.name,
+    wins,
+    draws,
+    losses,
+    goalsFor,
+    goalsAgainst,
+    points,
+    matches,
+  };
 }
