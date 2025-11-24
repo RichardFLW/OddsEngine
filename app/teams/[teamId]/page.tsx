@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getLigue1TeamProfile, getLigue1TeamSeasonData } from "@/lib/ligue1";
 import { getTeamIcon } from "@/lib/teamIcons";
+import { TeamSeasonSelector } from "./TeamSeasonSelector";
 
 type PageProps = {
   params: Promise<{ teamId: string }>;
@@ -99,16 +100,11 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
               <span className="mb-2 uppercase tracking-[0.3em] text-[0.65rem]">
                 Choisir une saison
               </span>
-              <select
-                defaultValue={selectedSeasonId}
-                className="w-full rounded-xl border border-white/20 bg-black/30 px-4 py-2 text-white outline-none transition focus:border-indigo-300 sm:w-64"
-              >
-                {profile.seasons.map((season) => (
-                  <option key={season.id} value={season.id}>
-                    {season.name}
-                  </option>
-                ))}
-              </select>
+              <TeamSeasonSelector
+                teamId={profile.teamId}
+                seasons={profile.seasons}
+                selectedSeasonId={selectedSeasonId}
+              />
             </label>
           </div>
 
