@@ -67,7 +67,7 @@ export type Matchday = {
 export type TeamProfile = {
   teamId: string;
   teamName: string;
-  seasons: { id: string; name: string }[];
+  seasons: { id: string; name: string; teamId: string }[];
   latestSeasonId: string;
 };
 
@@ -92,7 +92,13 @@ export type TeamSeasonData = {
   losses: number;
   goalsFor: number;
   goalsAgainst: number;
+  goalsForAvg: number;
+  goalsAgainstAvg: number;
   points: number;
+  totals: { line: number; over: number; under: number }[];
+  longestWinStreak: number;
+  longestDrawStreak: number;
+  longestLossStreak: number;
   matches: TeamSeasonMatch[];
 };
 
@@ -272,25 +278,49 @@ export async function getLigue1TeamProfile(
 ): Promise<TeamProfile | null> {
   const db = await readJsonFile<DbFile>(path.join(DATA_ROOT, "db.json"));
 
-  const seasonsForTeam: { id: string; name: string; teamName: string }[] = [];
+  // First pass: find the reference team name by id in any season.
+  let referenceName: string | null = null;
+  const seasonsCache = new Map<string, SeasonFile>();
   for (const seasonId of db.seasonOrder) {
     const filePath = path.join(LIGUE1_SEASONS_DIR, `${seasonId}.json`);
     const season = await readJsonFile<SeasonFile>(filePath);
-    const team = season.teams.find((t) => t.id === teamId);
-    if (team) {
-      seasonsForTeam.push({ id: season.id, name: season.name, teamName: team.name });
+    seasonsCache.set(seasonId, season);
+
+    const matchById = season.teams.find((t) => t.id === teamId);
+    if (matchById) {
+      referenceName = matchById.name;
     }
   }
 
-  if (seasonsForTeam.length === 0) {
+  if (!referenceName) {
     return null;
   }
 
+  // Second pass: collect all seasons where the same name appears.
+  const seasonsForTeam: { id: string; name: string; teamId: string; teamName: string }[] =
+    [];
+  for (const seasonId of db.seasonOrder) {
+    const season = seasonsCache.get(seasonId)!;
+    const matchByName = season.teams.find(
+      (t) => t.name.toLowerCase() === referenceName.toLowerCase(),
+    );
+    if (matchByName) {
+      seasonsForTeam.push({
+        id: season.id,
+        name: season.name,
+        teamId: matchByName.id,
+        teamName: matchByName.name,
+      });
+    }
+  }
+
+  if (seasonsForTeam.length === 0) return null;
+
   const latest = seasonsForTeam[0];
   return {
-    teamId,
-    teamName: latest.teamName,
-    seasons: seasonsForTeam.map((s) => ({ id: s.id, name: s.name })),
+    teamId: latest.teamId,
+    teamName: referenceName,
+    seasons: seasonsForTeam,
     latestSeasonId: latest.id,
   };
 }
@@ -343,7 +373,37 @@ export async function getLigue1TeamSeasonData(
   const losses = matches.filter((m) => m.result === "D").length;
   const goalsFor = matches.reduce((acc, m) => acc + m.goalsFor, 0);
   const goalsAgainst = matches.reduce((acc, m) => acc + m.goalsAgainst, 0);
+  const matchCount = matches.length || 1;
+  const goalsForAvg = goalsFor / matchCount;
+  const goalsAgainstAvg = goalsAgainst / matchCount;
   const points = wins * 3 + draws;
+
+  const TOTAL_LINES = [0.5, 1.5, 2.5, 3.5];
+  const totals = TOTAL_LINES.map((line) => {
+    const over = matches.filter(
+      (m) => m.goalsFor + m.goalsAgainst > line,
+    ).length;
+    const under = matches.length - over;
+    return { line, over, under };
+  });
+
+  const computeLongestStreak = (target: "V" | "N" | "D") => {
+    let best = 0;
+    let current = 0;
+    for (const m of matches) {
+      if (m.result === target) {
+        current += 1;
+        if (current > best) best = current;
+      } else {
+        current = 0;
+      }
+    }
+    return best;
+  };
+
+  const longestWinStreak = computeLongestStreak("V");
+  const longestDrawStreak = computeLongestStreak("N");
+  const longestLossStreak = computeLongestStreak("D");
 
   return {
     seasonId: season.id,
@@ -353,7 +413,13 @@ export async function getLigue1TeamSeasonData(
     losses,
     goalsFor,
     goalsAgainst,
+    goalsForAvg,
+    goalsAgainstAvg,
     points,
+    totals,
+    longestWinStreak,
+    longestDrawStreak,
+    longestLossStreak,
     matches,
   };
 }

@@ -29,8 +29,12 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
       ? resolvedSearchParams.season
       : profile.latestSeasonId;
 
+  const selectedSeasonTeamId =
+    profile.seasons.find((season) => season.id === selectedSeasonId)?.teamId ??
+    resolvedParams.teamId;
+
   const seasonData = await getLigue1TeamSeasonData(
-    resolvedParams.teamId,
+    selectedSeasonTeamId,
     selectedSeasonId,
   );
 
@@ -129,6 +133,39 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
             ))}
           </div>
 
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                title: "Buts marques",
+                total: seasonData.goalsFor,
+                avg: seasonData.goalsForAvg,
+                accent: "text-emerald-200",
+              },
+              {
+                title: "Buts encaisses",
+                total: seasonData.goalsAgainst,
+                avg: seasonData.goalsAgainstAvg,
+                accent: "text-rose-200",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-white/10 bg-black/30 p-5 shadow-inner shadow-black/30"
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+                  {item.title}
+                </p>
+                <p className={`mt-2 text-3xl font-semibold ${item.accent}`}>
+                  {item.total}
+                </p>
+                <p className="text-sm text-zinc-400">
+                  Moyenne par match :{" "}
+                  <span className="text-white">{item.avg.toFixed(2)}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+
           <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-zinc-300">
             {profile.seasons.map((season) => (
               <Link
@@ -163,12 +200,77 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
                     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase ${base}`}
                   >
                     {match.result}
-                    <span className="text-[0.7rem] text-zinc-300">
-                      {match.isHome ? "Domicile" : "Exterieur"}
-                    </span>
                   </span>
                 );
               })}
+            </div>
+          </section>
+
+          <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              {
+                label: "Serie de victoires",
+                value: seasonData.longestWinStreak,
+                accent: "text-emerald-200",
+                bg: "bg-emerald-900/30",
+              },
+              {
+                label: "Serie de nuls",
+                value: seasonData.longestDrawStreak,
+                accent: "text-amber-200",
+                bg: "bg-amber-900/20",
+              },
+              {
+                label: "Serie de defaites",
+                value: seasonData.longestLossStreak,
+                accent: "text-rose-200",
+                bg: "bg-rose-900/25",
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className={`rounded-2xl border border-white/10 p-5 shadow-inner shadow-black/30 ${item.bg}`}
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+                  {item.label}
+                </p>
+                <p className={`mt-2 text-3xl font-semibold ${item.accent}`}>
+                  {item.value}
+                </p>
+                <p className="text-xs text-zinc-400">Matches consecutifs</p>
+              </div>
+            ))}
+          </section>
+
+          <section className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5 shadow-inner shadow-black/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+                  Totaux de buts par match (equipe + adversaire)
+                </p>
+                <h3 className="text-lg font-semibold text-white">Lignes over / under</h3>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {seasonData.totals.map((line) => (
+                <div
+                  key={line.line}
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-white">Ligne {line.line}</p>
+                    <p className="text-xs text-zinc-400">Total de buts</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm font-semibold text-white">
+                    <span className="rounded-lg bg-emerald-900/40 px-3 py-1 text-emerald-100">
+                      Over: {line.over}
+                    </span>
+                    <span className="rounded-lg bg-amber-900/40 px-3 py-1 text-amber-100">
+                      Under: {line.under}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
