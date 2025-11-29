@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -9,73 +9,17 @@ import { getTeamIcon } from "@/lib/teamIcons";
 
 const getTeamHref = (teamId: string) => `/teams/${teamId}`;
 
-const MATCHDAY_DATE_FORMATTER = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "short",
-  day: "2-digit",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-  timeZone: "UTC",
-});
-
 type Props = {
   seasons: SeasonStandings[];
 };
 
 export function Ligue1Standings({ seasons }: Props) {
   const [selectedId, setSelectedId] = useState(() => seasons[0]?.id ?? "");
-  const [selectedMatchday, setSelectedMatchday] = useState<number>(() => {
-    const initialMatchdays = seasons[0]?.matchdays ?? [];
-    return (
-      initialMatchdays[initialMatchdays.length - 1]?.number ??
-      initialMatchdays[0]?.number ??
-      1
-    );
-  });
-  const matchdaysRef = useRef<HTMLElement | null>(null);
 
   const activeSeason = useMemo(
     () => seasons.find((season) => season.id === selectedId) ?? seasons[0],
     [selectedId, seasons],
   );
-
-  useEffect(() => {
-    if (!activeSeason) return;
-    const fallbackMatchdays = activeSeason.matchdays;
-    const fallbackNumber =
-      fallbackMatchdays[fallbackMatchdays.length - 1]?.number ??
-      fallbackMatchdays[0]?.number ??
-      1;
-    setSelectedMatchday(fallbackNumber);
-  }, [activeSeason?.id]);
-
-  const activeMatchday = useMemo(() => {
-    if (!activeSeason) return undefined;
-    return (
-      activeSeason.matchdays.find(
-        (matchday) => matchday.number === selectedMatchday,
-      ) ?? activeSeason.matchdays[activeSeason.matchdays.length - 1]
-    );
-  }, [activeSeason, selectedMatchday]);
-
-  const formatMatchDate = (isoDate: string) => {
-    const parts = MATCHDAY_DATE_FORMATTER.formatToParts(new Date(isoDate));
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
-      parts.find((part) => part.type === type)?.value ?? "";
-
-    const weekday = get("weekday");
-    const day = get("day");
-    const month = get("month");
-    const hour = get("hour");
-    const minute = get("minute");
-
-    return `${weekday} ${day} ${month} · ${hour}:${minute}`;
-  };
-
-  const handleJumpToMatchdays = () => {
-    matchdaysRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   if (!activeSeason) {
     return (
@@ -117,13 +61,12 @@ export function Ligue1Standings({ seasons }: Props) {
           </select>
         </label>
 
-        <button
-          type="button"
-          onClick={handleJumpToMatchdays}
+        <Link
+          href="/matchdays"
           className="w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
         >
           Voir les matchdays
-        </button>
+        </Link>
       </div>
 
       {activeSeason.standings.length > 0 ? (
@@ -212,108 +155,6 @@ export function Ligue1Standings({ seasons }: Props) {
           Le classement sera disponible lorsque des matchs auront ete joues.
         </p>
       )}
-
-      {activeSeason.matchdays.length > 0 ? (
-        <section
-          ref={matchdaysRef}
-          id="matchdays"
-          className="mt-8 rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-900/20 via-zinc-900/40 to-black/60 p-6 shadow-inner shadow-black/30"
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">
-                Matchdays
-              </p>
-              <h3 className="text-xl font-semibold text-white">
-                Journee {activeMatchday?.number ?? "-"}
-              </h3>
-              <p className="text-sm text-zinc-400">
-                {activeMatchday?.matches.length ?? 0} affiches
-              </p>
-            </div>
-
-            <label className="flex flex-col text-xs text-zinc-300 sm:text-sm">
-              <span className="mb-2 uppercase tracking-[0.3em] text-[0.65rem]">
-                Choisir la journee
-              </span>
-              <select
-                value={selectedMatchday}
-                onChange={(event) => setSelectedMatchday(Number(event.target.value))}
-                className="w-full rounded-xl border border-white/20 bg-black/30 px-4 py-2 text-white outline-none transition focus:border-indigo-300 sm:w-48"
-              >
-                {activeSeason.matchdays.map((matchday) => (
-                  <option key={matchday.number} value={matchday.number}>
-                    Journee {matchday.number}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {activeMatchday?.matches?.map((match) => (
-              <article
-                key={match.id}
-                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3 shadow-sm shadow-black/20"
-              >
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-3 text-sm font-semibold text-white">
-                    <Link
-                      href={getTeamHref(match.homeTeamId)}
-                      className="flex items-center gap-2 transition hover:text-indigo-200"
-                    >
-                      {(() => {
-                        const icon = getTeamIcon(match.homeTeamName);
-                        return icon ? (
-                          <Image
-                            src={icon}
-                            alt={`Logo ${match.homeTeamName}`}
-                            width={20}
-                            height={20}
-                            className="h-5 w-5 shrink-0 object-contain"
-                          />
-                        ) : (
-                          <div className="h-5 w-5 shrink-0 rounded-full border border-white/10" />
-                        );
-                      })()}
-                      <span>{match.homeTeamName}</span>
-                    </Link>
-                    <span className="text-xs font-normal uppercase tracking-wide text-zinc-400">
-                      vs
-                    </span>
-                    <Link
-                      href={getTeamHref(match.awayTeamId)}
-                      className="flex items-center gap-2 transition hover:text-indigo-200"
-                    >
-                      {(() => {
-                        const icon = getTeamIcon(match.awayTeamName);
-                        return icon ? (
-                          <Image
-                            src={icon}
-                            alt={`Logo ${match.awayTeamName}`}
-                            width={20}
-                            height={20}
-                            className="h-5 w-5 shrink-0 object-contain"
-                          />
-                        ) : (
-                          <div className="h-5 w-5 shrink-0 rounded-full border border-white/10" />
-                        );
-                      })()}
-                      <span>{match.awayTeamName}</span>
-                    </Link>
-                  </div>
-                  <p className="text-xs text-zinc-400">
-                    {formatMatchDate(match.playedAt)}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-black/40 px-3 py-2 text-sm font-semibold text-white">
-                  {match.homeScore} - {match.awayScore}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
     </section>
   );
 }

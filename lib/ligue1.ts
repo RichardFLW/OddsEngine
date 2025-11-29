@@ -99,7 +99,14 @@ export type TeamSeasonData = {
   longestWinStreak: number;
   longestDrawStreak: number;
   longestLossStreak: number;
+  goalsHome: { max: number; min: number; avg: number };
+  goalsAway: { max: number; min: number; avg: number };
   matches: TeamSeasonMatch[];
+};
+
+export type TeamInfo = {
+  teamId: string;
+  name: string;
 };
 
 const DATA_ROOT = path.join(process.cwd(), "data");
@@ -273,6 +280,25 @@ export async function getLigue1Standings(): Promise<SeasonStandings[]> {
   return loadLigue1Standings();
 }
 
+export async function getLigue1Teams(): Promise<TeamInfo[]> {
+  const db = await readJsonFile<DbFile>(path.join(DATA_ROOT, "db.json"));
+  const teamByName = new Map<string, TeamInfo>();
+
+  for (const seasonId of db.seasonOrder) {
+    const filePath = path.join(LIGUE1_SEASONS_DIR, `${seasonId}.json`);
+    const season = await readJsonFile<SeasonFile>(filePath);
+    for (const team of season.teams) {
+      if (!teamByName.has(team.name)) {
+        teamByName.set(team.name, { teamId: team.id, name: team.name });
+      }
+    }
+  }
+
+  return Array.from(teamByName.values()).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+}
+
 export async function getLigue1TeamProfile(
   teamId: string,
 ): Promise<TeamProfile | null> {
@@ -405,6 +431,18 @@ export async function getLigue1TeamSeasonData(
   const longestDrawStreak = computeLongestStreak("N");
   const longestLossStreak = computeLongestStreak("D");
 
+  const homeGoals = matches.filter((m) => m.isHome).map((m) => m.goalsFor);
+  const awayGoals = matches.filter((m) => !m.isHome).map((m) => m.goalsFor);
+  const calcGoalsStats = (arr: number[]) => {
+    if (arr.length === 0) return { max: 0, min: 0, avg: 0 };
+    const max = Math.max(...arr);
+    const min = Math.min(...arr);
+    const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+    return { max, min, avg };
+  };
+  const goalsHome = calcGoalsStats(homeGoals);
+  const goalsAway = calcGoalsStats(awayGoals);
+
   return {
     seasonId: season.id,
     seasonName: season.name,
@@ -420,6 +458,8 @@ export async function getLigue1TeamSeasonData(
     longestWinStreak,
     longestDrawStreak,
     longestLossStreak,
+    goalsHome,
+    goalsAway,
     matches,
   };
 }

@@ -206,6 +206,50 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
             </div>
           </section>
 
+          <section className="mt-8 grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                title: "Buts a domicile",
+                data: seasonData.goalsHome,
+                bg: "bg-emerald-900/20",
+              },
+              {
+                title: "Buts a l'exterieur",
+                data: seasonData.goalsAway,
+                bg: "bg-blue-900/20",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className={`rounded-2xl border border-white/10 p-5 shadow-inner shadow-black/30 ${item.bg}`}
+              >
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
+                  {item.title}
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-3 text-sm font-semibold text-white">
+                  <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-center">
+                    <p className="text-[0.65rem] uppercase tracking-wide text-zinc-400">
+                      Max
+                    </p>
+                    <p className="text-lg">{item.data.max}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-center">
+                    <p className="text-[0.65rem] uppercase tracking-wide text-zinc-400">
+                      Min
+                    </p>
+                    <p className="text-lg">{item.data.min}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-center">
+                    <p className="text-[0.65rem] uppercase tracking-wide text-zinc-400">
+                      Moy.
+                    </p>
+                    <p className="text-lg">{item.data.avg.toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </section>
+
           <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               {
@@ -248,7 +292,9 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
                 <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
                   Totaux de buts par match (equipe + adversaire)
                 </p>
-                <h3 className="text-lg font-semibold text-white">Lignes over / under</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Plus / Moins (Over / Under)
+                </h3>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -258,15 +304,19 @@ export default async function TeamPage({ params, searchParams }: PageProps) {
                   className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-white">Ligne {line.line}</p>
-                    <p className="text-xs text-zinc-400">Total de buts</p>
+                    <p className="text-sm font-semibold text-white">
+                      Ligne {line.line} buts
+                    </p>
+                    <p className="text-xs text-zinc-400">
+                      Combien de matches sont passes au-dessus / en dessous
+                    </p>
                   </div>
                   <div className="flex items-center gap-4 text-sm font-semibold text-white">
                     <span className="rounded-lg bg-emerald-900/40 px-3 py-1 text-emerald-100">
-                      Over: {line.over}
+                      Au-dessus : {line.over}
                     </span>
                     <span className="rounded-lg bg-amber-900/40 px-3 py-1 text-amber-100">
-                      Under: {line.under}
+                      En dessous : {line.under}
                     </span>
                   </div>
                 </div>
