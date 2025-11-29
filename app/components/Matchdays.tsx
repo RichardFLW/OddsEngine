@@ -145,7 +145,7 @@ export function Matchdays({ seasons }: Props) {
         {activeMatchday?.matches?.map((match) => (
           <article
             key={match.id}
-            className="flex flex-col items-center gap-3 rounded-xl border border-white/5 bg-black/40 px-4 py-3 text-center shadow-sm shadow-black/30"
+            className="flex w-full flex-col items-center gap-3 rounded-xl border border-white/5 bg-black/40 px-4 py-3 text-center shadow-sm shadow-black/30 sm:px-6 sm:py-4"
           >
             <div className="flex flex-col items-center gap-1">
               <p className="text-xs text-zinc-400">

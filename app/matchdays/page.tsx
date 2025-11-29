@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import { Matchdays } from "../components/Matchdays";
 import { getLigue1Standings } from "@/lib/ligue1";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Matchdays Ligue 1",
+  description:
+    "Consultez les matchdays Ligue 1 Uber Eats : horaires, affiches et scores saison par saison.",
+  alternates: {
+    canonical: "/matchdays",
+  },
+  openGraph: {
+    title: "Matchdays Ligue 1",
+    description:
+      "Parcourez chaque journee de Ligue 1 Uber Eats et visualisez toutes les rencontres et scores.",
+    url: "/matchdays",
+  },
+};
 
 export default async function MatchdaysPage() {
   const seasons = await getLigue1Standings();
