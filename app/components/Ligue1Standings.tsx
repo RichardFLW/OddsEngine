@@ -71,19 +71,21 @@ export function Ligue1Standings({ seasons }: Props) {
 
       {activeSeason.standings.length > 0 ? (
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-[640px] w-full table-auto border-separate border-spacing-y-2 text-xs sm:text-sm">
+          <table className="min-w-[760px] w-full table-fixed border-separate border-spacing-y-2 text-xs tabular-nums sm:text-sm">
             <thead className="text-[0.65rem] uppercase tracking-widest text-zinc-400 sm:text-xs">
               <tr>
-                <th className="px-3 py-2 text-left">#</th>
-                <th className="px-3 py-2 text-left">Equipe</th>
-                <th className="px-3 py-2 text-right">MJ</th>
-                <th className="px-3 py-2 text-right">V</th>
-                <th className="px-3 py-2 text-right">N</th>
-                <th className="px-3 py-2 text-right">D</th>
-                <th className="px-3 py-2 text-right">BP</th>
-                <th className="px-3 py-2 text-right">BC</th>
-                <th className="px-3 py-2 text-right">Diff</th>
-                <th className="px-3 py-2 text-right">Pts</th>
+                <th className="w-10 px-3 py-2 text-left">#</th>
+                <th className="w-[230px] px-3 py-2 text-left sm:w-[260px]">
+                  Equipe
+                </th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">MJ</th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">V</th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">N</th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">D</th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">BP</th>
+                <th className="w-14 px-3 py-2 text-right sm:w-16">BC</th>
+                <th className="w-16 px-3 py-2 text-right sm:w-18">Diff</th>
+                <th className="w-16 px-3 py-2 text-right sm:w-18">Pts</th>
               </tr>
             </thead>
             <tbody>
@@ -97,10 +99,10 @@ export function Ligue1Standings({ seasons }: Props) {
                     <td className="rounded-l-2xl px-3 py-2 text-left text-xs text-zinc-400 sm:text-sm lg:text-base">
                       {index + 1}
                     </td>
-                    <td className="px-3 py-2 text-sm font-medium">
+                    <td className="w-[230px] px-3 py-2 text-sm font-medium sm:w-[260px]">
                       <Link
                         href={getTeamHref(team.teamId)}
-                        className="group flex items-center gap-4 lg:gap-6"
+                        className="group flex max-w-[230px] items-center gap-4 whitespace-nowrap lg:gap-6 sm:max-w-[260px]"
                       >
                         {icon ? (
                           <Image
@@ -114,7 +116,7 @@ export function Ligue1Standings({ seasons }: Props) {
                         ) : (
                           <div className="h-7 w-7 shrink-0 border border-dashed border-white/10 sm:h-8 sm:w-8" />
                         )}
-                        <span className="text-sm transition group-hover:text-indigo-200 sm:text-base lg:text-lg">
+                        <span className="truncate text-sm transition group-hover:text-indigo-200 sm:text-base lg:text-lg">
                           {team.teamName}
                         </span>
                       </Link>

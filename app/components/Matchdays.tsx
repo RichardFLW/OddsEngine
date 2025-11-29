@@ -151,7 +151,7 @@ export function Matchdays({ seasons }: Props) {
               <p className="text-xs text-zinc-400">
                 {formatMatchDate(match.playedAt)}
               </p>
-              <div className="flex items-center justify-center gap-4 text-base font-semibold text-white sm:text-lg">
+              <div className="flex flex-wrap items-center justify-center gap-3 text-base font-semibold text-white sm:gap-4 sm:text-lg">
                 <Link
                   href={getTeamHref(match.homeTeamId)}
                   className="flex items-center gap-2 transition hover:text-indigo-200"
@@ -172,8 +172,14 @@ export function Matchdays({ seasons }: Props) {
                   })()}
                   <span className="text-base sm:text-lg">{match.homeTeamName}</span>
                 </Link>
+                <span className="rounded-lg bg-white/5 px-3 py-1 text-sm font-semibold text-white sm:text-base">
+                  {match.homeScore}
+                </span>
                 <span className="text-xs font-normal uppercase tracking-wide text-zinc-400">
                   vs
+                </span>
+                <span className="rounded-lg bg-white/5 px-3 py-1 text-sm font-semibold text-white sm:text-base">
+                  {match.awayScore}
                 </span>
                 <Link
                   href={getTeamHref(match.awayTeamId)}
@@ -196,9 +202,6 @@ export function Matchdays({ seasons }: Props) {
                   <span className="text-base sm:text-lg">{match.awayTeamName}</span>
                 </Link>
               </div>
-            </div>
-            <div className="rounded-lg bg-white/5 px-3 py-2 text-sm font-semibold text-white">
-              {match.homeScore} - {match.awayScore}
             </div>
           </article>
         ))}
