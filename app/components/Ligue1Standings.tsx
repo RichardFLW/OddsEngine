@@ -63,7 +63,7 @@ export function Ligue1Standings({ seasons }: Props) {
 
         <Link
           href="/matchdays"
-          className="w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
+          className="cta-link w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
         >
           Voir les matchdays
         </Link>

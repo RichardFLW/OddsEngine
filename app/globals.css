@@ -66,8 +66,23 @@ body {
   color: var(--muted) !important;
 }
 
+[data-theme="light"] .text-zinc-300 {
+  color: var(--muted) !important;
+}
+
 [data-theme="light"] .text-indigo-100 {
   color: #312e81 !important;
+}
+
+[data-theme="light"] .cta-link {
+  color: #0f172a !important;
+  border-color: rgba(79, 70, 229, 0.4) !important;
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+
+[data-theme="light"] .cta-link:hover {
+  border-color: rgba(79, 70, 229, 0.7) !important;
+  background-color: rgba(79, 70, 229, 0.18) !important;
 }
 
 [data-theme="light"] .text-indigo-300 {
