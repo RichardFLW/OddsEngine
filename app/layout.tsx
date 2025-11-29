@@ -83,8 +83,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-theme="dark">
+    <html lang="fr" data-theme="dark" suppressHydrationWarning>
       <body
+        data-theme="dark"
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="fixed right-4 top-4 z-50">

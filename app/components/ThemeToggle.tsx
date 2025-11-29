@@ -15,13 +15,13 @@ function getPreferredTheme(): Theme {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  // Hydrate with user/system preference after mount to avoid SSR/client mismatch.
-  useEffect(() => {
-    const preferred = getPreferredTheme();
-    setTheme(preferred);
-  }, []);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document !== "undefined") {
+      const current = document.documentElement.dataset.theme;
+      if (current === "light" || current === "dark") return current;
+    }
+    return getPreferredTheme();
+  });
 
   useEffect(() => {
     if (typeof document === "undefined") return;
