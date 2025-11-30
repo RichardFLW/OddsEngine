@@ -77,6 +77,57 @@
   ],
   "matches": [
     {
+      "id": "c06a5833-3720-4a13-a616-546f074da938",
+      "homeTeamId": "f776a96b-6590-4754-846a-ea81eff08639",
+      "awayTeamId": "1d615b56-4ca2-44f2-9908-b120b0cfa278",
+      "playedAt": "2025-11-29T20:05:00.000Z",
+      "homeScore": 2,
+      "awayScore": 2,
+      "oddsHistory": [
+        {
+          "id": "caf66fc8-212a-4708-a33c-70b310dde59b",
+          "home": 1.63,
+          "draw": 3.95,
+          "away": 5.04,
+          "timestamp": "2025-11-29T20:05:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": "14ce3235-1d25-4de0-89c7-5cf562654062",
+      "homeTeamId": "573b8ee3-1d35-493a-8d62-af242732652d",
+      "awayTeamId": "48310f79-ac83-4db2-bda3-ba613f413b72",
+      "playedAt": "2025-11-29T18:00:00.000Z",
+      "homeScore": 1,
+      "awayScore": 1,
+      "oddsHistory": [
+        {
+          "id": "03950680-d089-4248-a3b3-40157e7b0a1d",
+          "home": 1.85,
+          "draw": 3.5,
+          "away": 4.07,
+          "timestamp": "2025-11-29T18:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": "0c9dc2fb-dfad-4aed-a662-35c4908e6a9a",
+      "homeTeamId": "cca34e70-7688-4a00-ab02-3690c9e7cbac",
+      "awayTeamId": "8a93b28e-3543-4020-83eb-effe4a7248c2",
+      "playedAt": "2025-11-29T16:00:00.000Z",
+      "homeScore": 1,
+      "awayScore": 0,
+      "oddsHistory": [
+        {
+          "id": "a886b847-d5c0-406d-b21e-39244b6815d9",
+          "home": 4.31,
+          "draw": 4.33,
+          "away": 1.66,
+          "timestamp": "2025-11-29T16:00:00.000Z"
+        }
+      ]
+    },
+    {
       "id": "5b9a83d7-2bed-4065-a52b-87884cdc6c0f",
       "homeTeamId": "bd9e0002-8082-4b79-a8dd-6e44fd954ba3",
       "awayTeamId": "91af54cd-3a54-4f86-a1bd-9fefcf67fc4d",
