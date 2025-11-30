@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Role = "Administrateur" | "Analyste" | "Coach";
-
 type StoredSession = {
   email: string;
-  role: Role;
 };
 
 const SESSION_KEY = "odds-session";
@@ -21,7 +18,7 @@ export default function DashboardPage() {
     if (!stored) return;
     try {
       const parsed = JSON.parse(stored) as StoredSession;
-      if (parsed?.email && parsed?.role) {
+      if (parsed?.email) {
         setSession(parsed);
       }
     } catch {
@@ -31,27 +28,24 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-950 to-black text-white">
-      <div className="mx-auto flex min-h-screen max-w-xl flex-col justify-center gap-6 px-4 py-12">
+      <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-4 py-12">
         <header className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">
             Tableau de bord
           </p>
           <h1 className="text-3xl font-semibold sm:text-4xl">
-            Espace role-based (placeholder)
+            Espace connecté (placeholder)
           </h1>
           <p className="text-sm text-zinc-400">
-            Contenu à brancher selon le rôle une fois l&apos;authentification en place.
+            Contenu à brancher après implémentation de l&apos;authentification.
           </p>
         </header>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+        <section className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
           {session ? (
             <div className="space-y-2 text-sm text-zinc-200">
               <p>
                 <span className="text-zinc-400">Email :</span> {session.email}
-              </p>
-              <p>
-                <span className="text-zinc-400">Rôle :</span> {session.role}
               </p>
             </div>
           ) : (

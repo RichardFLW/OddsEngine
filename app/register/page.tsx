@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -10,45 +10,37 @@ type StoredSession = {
   email: string;
 };
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(SESSION_KEY);
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored) as StoredSession;
-      if (parsed?.email) setEmail(parsed.email);
-    } catch {
-      // ignore corrupted storage
-    }
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
-    if (!email || !password) {
-      setError("Email et mot de passe sont requis.");
+    if (!email || !password || !confirm) {
+      setError("Tous les champs sont requis.");
+      return;
+    }
+
+    if (password !== confirm) {
+      setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Simulation d'authentification locale
       const session: StoredSession = { email };
       if (typeof window !== "undefined") {
         window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
       }
-      // Redirection vers le futur tableau de bord
       router.push("/dashboard");
     } catch {
-      setError("Impossible de vous connecter pour le moment.");
+      setError("Impossible de créer le compte pour le moment.");
     } finally {
       setIsSubmitting(false);
     }
@@ -59,14 +51,14 @@ export default function LoginPage() {
       <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-4 py-12">
         <header className="space-y-2 text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">
-            Connexion
+            Inscription
           </p>
           <h1 className="text-3xl font-semibold sm:text-4xl">
-            Accès tableau de bord
+            Créez un compte test
           </h1>
           <p className="text-sm text-zinc-400">
-            Email et mot de passe suffisent. L&apos;authentification réelle sera
-            branchée ultérieurement.
+            Cette étape simule la création d&apos;un compte. Branchez votre back-end
+            plus tard pour la vraie inscription.
           </p>
         </header>
 
@@ -94,7 +86,20 @@ export default function LoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-indigo-300"
                 placeholder="••••••••"
-                autoComplete="current-password"
+                autoComplete="new-password"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm text-zinc-300">
+              <span>Confirmer le mot de passe</span>
+              <input
+                type="password"
+                required
+                value={confirm}
+                onChange={(event) => setConfirm(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-indigo-300"
+                placeholder="••••••••"
+                autoComplete="new-password"
               />
             </label>
 
@@ -105,7 +110,7 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-600/80 px-4 py-3 text-sm font-semibold text-white transition hover:border-indigo-300 hover:bg-indigo-500/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Connexion..." : "Se connecter"}
+              {isSubmitting ? "Création..." : "Créer mon compte"}
             </button>
           </form>
         </section>
@@ -113,20 +118,20 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-2 text-sm text-zinc-300">
           <div className="flex justify-center gap-3">
             <Link
-              href="/"
+              href="/login"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 font-semibold text-white transition hover:border-indigo-300 hover:bg-indigo-500/20"
             >
-              ← Retour à l&apos;accueil
+              ← Retour connexion
             </Link>
             <Link
-              href="/register"
+              href="/"
               className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-600/10 px-4 py-2 font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20"
             >
-              Pas de compte ?
+              Accueil
             </Link>
           </div>
           <p className="text-xs text-zinc-400">
-            Besoin d&apos;un accès ? Créez un compte test via l&apos;inscription.
+            Déjà un compte ? Connectez-vous pour accéder au tableau de bord.
           </p>
         </div>
       </div>
