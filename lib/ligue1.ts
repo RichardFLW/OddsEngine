@@ -18,6 +18,7 @@ type Match = {
   playedAt: string;
   homeScore: number;
   awayScore: number;
+  oddsHistory?: MatchOddsSnapshot[];
 };
 
 type SeasonFile = {
@@ -26,6 +27,14 @@ type SeasonFile = {
   teams: Team[];
   matches: Match[];
   matchdays?: { number: number; matchIds: string[] }[];
+};
+
+type MatchOddsSnapshot = {
+  id: string;
+  home: number;
+  draw: number;
+  away: number;
+  timestamp: string;
 };
 
 export type TeamStanding = {
@@ -107,6 +116,29 @@ export type TeamSeasonData = {
 export type TeamInfo = {
   teamId: string;
   name: string;
+};
+
+export type SimulationMatch = {
+  id: string;
+  seasonId: string;
+  seasonName: string;
+  playedAt: string;
+  homeTeamId: string;
+  homeTeamName: string;
+  awayTeamId: string;
+  awayTeamName: string;
+  homeScore: number;
+  awayScore: number;
+  favouriteTeamId: string;
+  favouriteTeamName: string;
+  favouriteOdds: number;
+  winnerTeamId: string | null;
+};
+
+export type SimulationSeason = {
+  id: string;
+  name: string;
+  matches: SimulationMatch[];
 };
 
 const DATA_ROOT = path.join(process.cwd(), "data");
@@ -462,4 +494,89 @@ export async function getLigue1TeamSeasonData(
     goalsAway,
     matches,
   };
+}
+
+function pickLatestOdds(
+  history: MatchOddsSnapshot[] | undefined,
+): MatchOddsSnapshot | null {
+  if (!history || history.length === 0) return null;
+
+  return history.reduce<MatchOddsSnapshot>((latest, current) => {
+    if (!latest) return current;
+    const latestTime = new Date(latest.timestamp).getTime();
+    const currentTime = new Date(current.timestamp).getTime();
+    return currentTime > latestTime ? current : latest;
+  });
+}
+
+export async function getLigue1SimulationSeasons(): Promise<SimulationSeason[]> {
+  const db = await readJsonFile<DbFile>(path.join(DATA_ROOT, "db.json"));
+
+  const seasons = await Promise.all(
+    db.seasonOrder.map(async (seasonId) => {
+      const filePath = path.join(LIGUE1_SEASONS_DIR, `${seasonId}.json`);
+      const season = await readJsonFile<SeasonFile>(filePath);
+      const teamNameById = new Map(
+        season.teams.map((team) => [team.id, team.name]),
+      );
+
+      const matches: SimulationMatch[] = season.matches
+        .map((match) => {
+          if (
+            typeof match.homeScore !== "number" ||
+            typeof match.awayScore !== "number"
+          ) {
+            return null;
+          }
+
+          const latestOdds = pickLatestOdds(match.oddsHistory);
+          if (!latestOdds) return null;
+
+          const favouriteTeamId =
+            latestOdds.home <= latestOdds.away
+              ? match.homeTeamId
+              : match.awayTeamId;
+          const favouriteTeamName =
+            favouriteTeamId === match.homeTeamId
+              ? teamNameById.get(match.homeTeamId) ?? "Equipe inconnue"
+              : teamNameById.get(match.awayTeamId) ?? "Equipe inconnue";
+
+          let winnerTeamId: string | null = null;
+          if (match.homeScore > match.awayScore) {
+            winnerTeamId = match.homeTeamId;
+          } else if (match.homeScore < match.awayScore) {
+            winnerTeamId = match.awayTeamId;
+          }
+
+          return {
+            id: match.id,
+            seasonId: season.id,
+            seasonName: season.name,
+            playedAt: match.playedAt,
+            homeTeamId: match.homeTeamId,
+            homeTeamName: teamNameById.get(match.homeTeamId) ?? "Equipe inconnue",
+            awayTeamId: match.awayTeamId,
+            awayTeamName: teamNameById.get(match.awayTeamId) ?? "Equipe inconnue",
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+            favouriteTeamId,
+            favouriteTeamName,
+            favouriteOdds:
+              favouriteTeamId === match.homeTeamId
+                ? latestOdds.home
+                : latestOdds.away,
+            winnerTeamId,
+          } satisfies SimulationMatch;
+        })
+        .filter((match): match is SimulationMatch => Boolean(match));
+
+      return {
+        id: season.id,
+        name: season.name,
+        matches,
+      };
+    }),
+  );
+
+  return seasons;
 }

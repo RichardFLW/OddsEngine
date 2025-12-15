@@ -61,12 +61,20 @@ export function Ligue1Standings({ seasons }: Props) {
           </select>
         </label>
 
-        <Link
-          href="/matchdays"
-          className="cta-link w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
-        >
-          Voir les matchdays
-        </Link>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link
+            href="/matchdays"
+            className="cta-link w-full rounded-xl border border-indigo-500/30 bg-indigo-600/10 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-500/20 sm:w-auto sm:text-sm"
+          >
+            Voir les matchdays
+          </Link>
+          <Link
+            href="/simulation"
+            className="cta-link w-full rounded-xl border border-emerald-500/30 bg-emerald-600/10 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:border-emerald-300 hover:bg-emerald-500/20 sm:w-auto sm:text-sm"
+          >
+            Page simulation
+          </Link>
+        </div>
       </div>
 
       {activeSeason.standings.length > 0 ? (
